@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Data Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .form-section {
+            padding: 30px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 12px 25px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 12px 25px rgba(33, 150, 243, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 12px 25px rgba(244, 67, 54, 0.4);
+        }
+        
+        .preview-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .preview-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e1e5e9;
+            font-size: 0.9rem;
+        }
+        
+        .data-table tr:hover {
+            background: #f1f3f4;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .delete-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background: #cc0000;
+            transform: scale(1.05);
+        }
+        
+        .record-count {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Prakash Sangave Expert 🌟</h1>
+            <p>आसानी से डेटा भरें और Excel फाइल बनाएं</p>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">👤 Name (नाम):</label>
+                    <input type="text" id="name" placeholder="नाम दर्ज करें" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">📧 Email ID:</label>
+                    <input type="email" id="email" placeholder="email@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile">📱 Mobile Number:</label>
+                    <input type="tel" id="mobile" placeholder="10 अंकों का नंबर" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mainId">🆔 Main ID:</label>
+                    <input type="text" id="mainId" placeholder="खाली छोड़ें, auto generate होगा">
+                </div>
+                
+                <div class="form-group">
+                    <label for="idNo">🎫 ID Number:</label>
+                    <input type="text" id="idNo" placeholder="खाली छोड़ें, auto generate होगा">
+                </div>
+                
+                <div class="form-group">
+                    <label for="pw">🔑 PW:</label>
+                    <input type="text" id="pw" placeholder="खाली छोड़ें, auto generate होगा">
+                </div>
+                
+                <div class="form-group">
+                    <label for="left">⬅️ Left:</label>
+                    <input type="number" id="left" value="1" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="right">➡️ Right:</label>
+                    <input type="number" id="right" value="1" min="0">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn btn-primary" id="addBtn">➕ ADD DATA</button>
+                <button type="button" class="btn btn-secondary" id="downloadBtn">📥 DOWNLOAD EXCEL</button>
+                <button type="button" class="btn btn-danger" id="clearBtn">🗑️ CLEAR ALL</button>
+            </div>
+            
+            <div id="statusMessage"></div>
+            <div class="record-count" id="recordCount">📋 Total Records: 0</div>
+        </div>
+        
+        <div class="preview-section">
+            <h3>📋 Data Preview</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Sr No</th>
+                        <th>Name</th>
+                        <th>Email ID</th>
+                        <th>Mobile No</th>
+                        <th>Main ID</th>
+                        <th>ID NO</th>
+                        <th>PW</th>
+                        <th>LEFT</th>
+                        <th>RIGHT</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                    <tr>
+                        <td colspan="9" style="text-align: center; color: #666; font-style: italic; padding: 30px;">
+                            कोई डेटा नहीं मिला। कृपया डेटा जोड़ें।
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let dataArray = [];
+        let serialNumber = 1;
+
+        // DOM Elements
+        const addBtn = document.getElementById('addBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const recordCount = document.getElementById('recordCount');
+        const dataTableBody = document.getElementById('dataTableBody');
+
+        // Event Listeners
+        addBtn.addEventListener('click', addData);
+        downloadBtn.addEventListener('click', downloadExcel);
+        clearBtn.addEventListener('click', clearAll);
+
+        function showStatus(message, isError = false) {
+            statusMessage.innerHTML = `<div class="status-message ${isError ? 'status-error' : 'status-success'}">${message}</div>`;
+            setTimeout(() => {
+                statusMessage.innerHTML = '';
+            }, 4000);
+        }
+
+        function updateRecordCount() {
+            recordCount.textContent = `📋 Total Records: ${dataArray.length}`;
+        }
+
+        function generateRandomId() {
+            const prefix = 'QN';
+            const randomNum = Math.floor(Math.random() * 900000) + 100000;
+            return prefix + randomNum;
+        }
+
+        function generateRandomPW() {
+            return Math.floor(Math.random() * 900000) + 100000;
+        }
+
+        function addData() {
+            console.log('Add Data function called');
+            
+            // Get form values
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+            const mainId = document.getElementById('mainId').value.trim();
+            const idNo = document.getElementById('idNo').value.trim();
+            const pw = document.getElementById('pw').value.trim();
+            const left = document.getElementById('left').value || '1';
+            const right = document.getElementById('right').value || '1';
+            
+            // Validation
+            if (!name) {
+                showStatus('❌ कृपया नाम दर्ज करें!', true);
+                document.getElementById('name').focus();
+                return;
+            }
+            
+            if (!email) {
+                showStatus('❌ कृपया Email ID दर्ज करें!', true);
+                document.getElementById('email').focus();
+                return;
+            }
+            
+            if (!mobile || mobile.length < 10) {
+                showStatus('❌ कृपया valid Mobile Number दर्ज करें!', true);
+                document.getElementById('mobile').focus();
+                return;
+            }
+            
+            // Create data object
+            const data = {
+                srNo: serialNumber++,
+                name: name,
+                email: email,
+                mobile: mobile,
+                mainId: mainId || generateRandomId(),
+                idNo: idNo || generateRandomId(),
+                pw: pw || generateRandomPW(),
+                left: left,
+                right: right
+            };
+            
+            // Add to array
+            dataArray.push(data);
+            console.log('Data added:', data);
+            console.log('Total records:', dataArray.length);
+            
+            // Update UI
+            updateTable();
+            updateRecordCount();
+            clearForm();
+            
+            // Show success message
+            showStatus(`✅ ${data.name} का डेटा जोड़ा गया! (${dataArray.length} records)`);
+        }
+
+        function clearForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('mobile').value = '';
+            document.getElementById('mainId').value = '';
+            document.getElementById('idNo').value = '';
+            document.getElementById('pw').value = '';
+            document.getElementById('left').value = '1';
+            document.getElementById('right').value = '1';
+            document.getElementById('name').focus();
+        }
+
+        function updateTable() {
+            if (dataArray.length === 0) {
+                dataTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" style="text-align: center; color: #666; font-style: italic; padding: 30px;">
+                            कोई डेटा नहीं मिला। कृपया डेटा जोड़ें।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            dataTableBody.innerHTML = dataArray.map((item, index) => `
+                <tr>
+                    <td>${item.srNo}</td>
+                    <td>${item.name}</td>
+                    <td>${item.email}</td>
+                    <td>${item.mobile}</td>
+                    <td>${item.mainId}</td>
+                    <td>${item.idNo}</td>
+                    <td>${item.pw}</td>
+                    <td>${item.left}</td>
+                    <td>${item.right}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteRecord(${index})">
+                            🗑️ Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteRecord(index) {
+            console.log('Delete record called for index:', index);
+            
+            if (index < 0 || index >= dataArray.length) {
+                showStatus('❌ Invalid record index!', true);
+                return;
+            }
+            
+            const recordName = dataArray[index].name;
+            
+            if (confirm(`क्या आप ${recordName} का रिकॉर्ड डिलीट करना चाहते हैं?`)) {
+                dataArray.splice(index, 1);
+                console.log('Record deleted. Remaining:', dataArray.length);
+                
+                updateTable();
+                updateRecordCount();
+                showStatus(`🗑️ ${recordName} का रिकॉर्ड डिलीट कर दिया गया!`);
+            }
+        }
+
+        function downloadExcel() {
+            console.log('Download Excel called');
+            
+            if (dataArray.length === 0) {
+                showStatus('❌ पहले कुछ डेटा जोड़ें फिर Download करें!', true);
+                return;
+            }
+
+            try {
+                // Clean Excel data - Direct start with headers and user data
+                const excelData = [
+                    // Headers only
+                    ['Sr No', 'Name', 'Email ID', 'Mobile No', 'Main ID', 'ID NO', 'PW', 'LEFT', 'RIGHT']
+                ];
+
+                // Add user data directly
+                dataArray.forEach(item => {
+                    excelData.push([
+                        item.srNo,
+                        item.name,
+                        item.email,
+                        item.mobile,
+                        item.mainId,
+                        item.idNo,
+                        item.pw,
+                        item.left,
+                        item.right
+                    ]);
+                });
+
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+                // Set column widths
+                ws['!cols'] = [
+                    {wch: 8},   // Sr No
+                    {wch: 20},  // Name
+                    {wch: 25},  // Email
+                    {wch: 15},  // Mobile
+                    {wch: 12},  // Main ID
+                    {wch: 12},  // ID NO
+                    {wch: 10},  // PW
+                    {wch: 8},   // LEFT
+                    {wch: 8}    // RIGHT
+                ];
+
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "User Data");
+
+                // Generate filename with current date and time
+                const now = new Date();
+                const filename = `UserData_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${now.getHours()}-${now.getMinutes()}.xlsx`;
+
+                // Save file
+                XLSX.writeFile(wb, filename);
+                showStatus(`📁 Excel file "${filename}" download हो गई! (${dataArray.length} records)`);
+                
+                console.log('Excel file downloaded successfully');
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                showStatus('❌ Excel download में error! कृपया फिर से try करें।', true);
+            }
+        }
+
+        function clearAll() {
+            console.log('Clear All called');
+            
+            if (dataArray.length === 0) {
+                showStatus('❌ कोई डेटा नहीं है साफ करने के लिए!', true);
+                return;
+            }
+            
+            const recordCount = dataArray.length;
+            
+            if (confirm(`क्या आप वाकई सभी ${recordCount} records साफ करना चाहते हैं?`)) {
+                dataArray = [];
+                serialNumber = 1;
+                
+                updateTable();
+                updateRecordCount();
+                clearForm();
+                
+                showStatus(`🗑️ सभी ${recordCount} records साफ कर दिए गए!`);
+                console.log('All data cleared');
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                addData();
+            }
+        });
+
+        // Make deleteRecord function global for onclick
+        window.deleteRecord = deleteRecord;
+    </script>
+</body>
+</html>
